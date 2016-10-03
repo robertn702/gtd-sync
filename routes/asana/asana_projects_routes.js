@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const asana = require('../../asana');
+const asana = require('./asana_client');
 
 const ASANA_USER_ID = 24499340153675;
 const ASANA_WORKSPACE_ID = 498346170860;
