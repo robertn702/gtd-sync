@@ -1,0 +1,11 @@
+{
+  "name": "gtd-sync",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Robert Niimi <robertn702@gmail.com>",
+  "license": "ISC"
+}
