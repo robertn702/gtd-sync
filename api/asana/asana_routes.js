@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 /* Routes */
-const tasksRoutes = require('./asana_tasks_routes');
-const projectsRoutes = require('./asana_projects_routes');
+const tasksRoutes = require('./routes/asana_tasks_routes');
+const projectsRoutes = require('./routes/asana_projects_routes');
 
 module.exports = (app) => {
   app.use('/asana', tasksRoutes);
