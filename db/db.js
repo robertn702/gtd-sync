@@ -8,7 +8,7 @@ db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='jira_issues'
     db.run(`
       CREATE TABLE jira_issues (
         id integer PRIMARY KEY,
-        project_id integer NOT NULL
+        project_id integer NOT NULL,
         asana_task_id integer NOT NULL UNIQUE
       )
     `, (err) => {

@@ -16,14 +16,22 @@ router.route('/webhook')
       }
     } = req;
 
-    console.log('[jira_webhook_routes] issue: ', issue);
+    // console.log('[jira_webhook_routes] issue: ', issue);
 
-    db.get(`SELECT asana_id FROM jira_issues WHERE id = ${issue.id} LIMIT 1`, (err, rows) => {
+    db.get(`
+      SELECT * FROM jira_issues
+      WHERE id = ${issue.id}
+      JOIN jira_projects
+      ON jira_issues.project_id=jira_projects.id
+      LIMIT 1
+    `, (err, row) => {
       if (err) {
         console.log('[jira_webhook_routes] error finding id: ', err);
       }
 
-      if (!rows) {
+      console.log('[jira_webhook_routes] row: ', row);
+
+      if (!row) {
         console.log('[jira_webhook_routes] creating asana task');
         asana.users.me().then((me) => {
           console.log('[jira_webhook_routes] me: ', me);
@@ -33,11 +41,11 @@ router.route('/webhook')
             notes: `${issue.fields.description}`,
             assignee: me.id
           }).then((asanaTask) => {
-            db.run(`INSERT INTO jira_issues (id,asana_id) VALUES (${issue.id},${asanaTask.id})`)
+            db.run(`INSERT INTO jira_issues (id,project_id,asana_task_id) VALUES (${issue.id},${asanaTask.project_id},${asanaTask.id})`)
           })
         })
       } else {
-        console.log('[jira_webhook_routes] got assana task rows: ', rows);
+        console.log('[jira_webhook_routes] got assana task row: ', row);
       }
     })
   });
