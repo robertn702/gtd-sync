@@ -1,3 +1,4 @@
 .env
+gtd
 node_modules/
 *.config.js

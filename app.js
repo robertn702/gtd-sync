@@ -9,18 +9,14 @@ const express = require('express');
 
 const app = express();
 const port = process.env.PORT || 8080;
-
-/* Routes */
-const asanaRoutes = require('./api/asana/asana_routes');
-const trelloRoutes = require('./api/trello/trello_routes');
-const jiraRoutes = require('./api/jira/jira_routes');
+const db = require('./db/db');
 
 app.use(bodyParser.json());
 
 /* Load Routes */
-asanaRoutes(app);
-jiraRoutes(app);
-trelloRoutes(app);
+require('./api/asana/asana_routes')(app);
+require('./api/trello/trello_routes')(app);
+require('./api/jira/jira_routes')(app);
 
 /* Start Server */
 app.listen(port, () => {

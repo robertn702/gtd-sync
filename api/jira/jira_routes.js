@@ -4,12 +4,10 @@ const router = express.Router();
 const jira = require('./jira_client');
 
 const issuesRoutes = require('./routes/jira_issues_routes');
-
-jira.listIssueTypes((err, issueTypes) => {
-  console.log('[jira_routes] issueTypes: ', issueTypes);
-})
+const webhookRoutes = require('./routes/jira_webhook_routes');
 
 /* Routes */
 module.exports = (app) => {
   app.use('/jira', issuesRoutes);
+  app.use('/jira', webhookRoutes);
 }
