@@ -3,6 +3,7 @@ const router = express.Router();
 const jira = require('../jira_client');
 const asana = require('../../asana/asana_client');
 const db = require('../../../db/db');
+const dbUtils = require('../../../db/db_utils');
 const jiraConfig = require('../jira.config');
 
 router.route('/webhook')
@@ -16,38 +17,9 @@ router.route('/webhook')
       }
     } = req;
 
-    // console.log('[jira_webhook_routes] issue: ', issue);
-
-    db.get(`
-      SELECT * FROM jira_issues
-      WHERE id = ${issue.id}
-      JOIN jira_projects
-      ON jira_issues.project_id=jira_projects.id
-      LIMIT 1
-    `, (err, row) => {
-      if (err) {
-        console.log('[jira_webhook_routes] error finding id: ', err);
-      }
-
-      console.log('[jira_webhook_routes] row: ', row);
-
-      if (!row) {
-        console.log('[jira_webhook_routes] creating asana task');
-        asana.users.me().then((me) => {
-          console.log('[jira_webhook_routes] me: ', me);
-          asana.tasks.createInWorkspace(jiraConfig.workspaces.ENGAGIO.toString(),
-          {
-            name: `[${issue.key}] ${issue.fields.summary}`,
-            notes: `${issue.fields.description}`,
-            assignee: me.id
-          }).then((asanaTask) => {
-            db.run(`INSERT INTO jira_issues (id,project_id,asana_task_id) VALUES (${issue.id},${asanaTask.project_id},${asanaTask.id})`)
-          })
-        })
-      } else {
-        console.log('[jira_webhook_routes] got assana task row: ', row);
-      }
-    })
+    dbUtils.findOrCreateJiraIssueToAsanaTask(issue, (asanaTask) => {
+      res.send(asanaTask);
+    });
   });
 
 module.exports = router;
