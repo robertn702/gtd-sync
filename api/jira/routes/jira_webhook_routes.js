@@ -3,8 +3,13 @@ const router = express.Router();
 const jira = require('../jira_client');
 const asana = require('../../asana/asana_client');
 const db = require('../../../db/db');
-const dbUtils = require('../../../db/db_utils');
+// const dbUtils = require('../../../db/db_utils');
+const apiUtils = require('../../api_utils');
 const jiraConfig = require('../jira.config');
+
+const taskIssueDiff = () => {
+
+}
 
 router.route('/webhook')
   .get((req, res) => {
@@ -17,7 +22,7 @@ router.route('/webhook')
       }
     } = req;
 
-    dbUtils.findOrCreateJiraIssueToAsanaTask(issue, (asanaTask) => {
+    apiUtils.findOrCreateJiraIssueToAsanaTask(issue, (asanaTask) => {
       res.send(asanaTask);
     });
   });

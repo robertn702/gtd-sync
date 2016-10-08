@@ -1,15 +1,28 @@
-const db = require('./db');
-const _ = require ('lodash');
-const jira = require('../api/jira/jira_client');
-const asana = require('../api/asana/asana_client');
-const jiraConfig = require('../api/jira/jira.config');
+const db = require('../db/db');
+const jiraConfig = require('./jira/jira.config');
 
 module.exports = {
+  createAsanaTaskDetails(jiraIssue, asanaProject) {
+    return {
+      assignee: me.id,
+      name: `[${jiraIssue.key}] ${jiraIssue.fields.summary}`,
+      notes: `${jiraIssue.fields.description}`,
+      projects: _.toString(asanaProject.id)
+    };
+  },
+  createAsanaProjectDetails(jiraProject) {
+    return {
+      name: key,
+      notes: name,
+      workspace: jiraConfig.workspaces.ENGAGIO
+    };
+  },
   findOrCreateJiraToAsanaProj(jiraProject, next) {
     const {id, key, name} = jiraProject;
     db.get(`
       SELECT asana_project_id
       FROM jira_projects
+      WHERE id=${id}
       LIMIT 1
     `, (err, jiraProjectRow) => {
       if (err) {
@@ -19,12 +32,7 @@ module.exports = {
 
       if (!jiraProjectRow) {
         // create new asana project
-
-        asana.projects.create({
-          name: key,
-          notes: name,
-          workspace: jiraConfig.workspaces.ENGAGIO
-        }).then((asanaProject) => {
+        asana.projects.create(this.createAsanaProjectDetails(jiraProject)).then((asanaProject) => {
           console.log('[db_utils] created asana project: ', asanaProject);
           // on successful complete, insert new row into jira_project table
           db.run(`
@@ -48,10 +56,13 @@ module.exports = {
     })
   },
   findOrCreateJiraIssueToAsanaTask(jiraIssue, next) {
+    console.log('[db_utils] @findOrCreateJiraIssueToAsanaTask -> jiraIssue: ', jiraIssue);
+    console.log('[db_utils] @findOrCreateJiraIssueToAsanaTask -> jiraIssue.fields.attachment: ', jiraIssue.fields.attachment);
     db.get(`
       SELECT * FROM jira_issues
       JOIN jira_projects
       ON jira_issues.project_id=jira_projects.id
+      WHERE jira_issues.id=${jiraIssue.id}
       LIMIT 1
     `, (err, jiraIssueRow) => {
       // WHERE jira_projects.id=${_.toNumber(jiraIssue.id)}
@@ -64,12 +75,7 @@ module.exports = {
       if (!jiraIssueRow) {
         this.findOrCreateJiraToAsanaProj(jiraIssue.fields.project, (err, asanaProject) => {
           asana.users.me().then((me) => {
-            asana.tasks.create({
-              assignee: me.id,
-              name: `[${jiraIssue.key}] ${jiraIssue.fields.summary}`,
-              notes: `${jiraIssue.fields.description}`,
-              projects: _.toString(asanaProject.id)
-            }).then((asanaTask) => {
+            asana.tasks.create(this.createAsanaTaskDetails(jiraIssue, asanaProject)).then((asanaTask) => {
               console.log('[db_utils] created asanaTask: ', asanaTask);
               db.run(`
                 INSERT INTO jira_issues (id,project_id,asana_task_id)
