@@ -1,47 +1,33 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('gtd');
+const dbUtils = require('./db_utils');
 
-db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='jira_issues'", (err, rows) => {
-  if (err) {
-    console.log('[db] err: ', err);
-  } else if (!rows) {
-    db.run(`
-      CREATE TABLE jira_issues (
-        id integer PRIMARY KEY,
-        project_id integer NOT NULL,
-        asana_task_id integer NOT NULL UNIQUE
-      )
-    `, (err) => {
-      if (err) {
-        console.log('[db] error creating jira_issues table: ', err);
-      } else {
-        console.log('[db] SQL Table "jira_issues" initialized');
-      }
-    });
-  } else {
-    console.log('[db] SQL Table "jira_issues" already initialized');
-  }
-});
+dbUtils.initializeTable(db, 'jira_issues', `
+  id integer PRIMARY KEY,
+  project_id integer NOT NULL,
+  asana_task_id integer NOT NULL UNIQUE
+`);
 
-db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='jira_projects'", (err, rows) => {
-  if (err) {
-    console.log('[db] err: ', err);
-  } else if (!rows) {
-    db.run(`
-      CREATE TABLE jira_projects (
-        id integer PRIMARY KEY,
-        asana_project_id integer NOT NULL UNIQUE
-      )
-    `, (err) => {
-      if (err) {
-        console.log('[db] error creating jira_projects table: ', err);
-      } else {
-        console.log('[db] SQL Table "jira_projects" initialized');
-      }
-    })
-  } else {
-    console.log('[db] SQL Table "jira_projects" already initialized');
-  }
-});
+dbUtils.initializeTable(db, 'jira_projects', `
+  id integer PRIMARY KEY,
+  asana_project_id integer NOT NULL UNIQUE
+`);
+
+dbUtils.initializeTable(db, 'trello_cards', `
+  id string PRIMARY KEY,
+  asana_project_id integer NOT NULL UNIQUE
+`);
+
+dbUtils.initializeTable(db, 'trello_checklists', `
+  id string PRIMARY KEY,
+  card_id string NOT NULL,
+  asana_section_id integer NOT NULL UNIQUE
+`);
+
+dbUtils.initializeTable(db, 'trello_checklist_items', `
+  id string PRIMARY KEY,
+  checklist_id string NOT NULL,
+  asana_task_id NOT NULL UNIQUE
+`);
 
 module.exports = db;

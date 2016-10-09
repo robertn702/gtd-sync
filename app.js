@@ -14,9 +14,9 @@ const db = require('./db/db');
 app.use(bodyParser.json());
 
 /* Load Routes */
-require('./api/asana/asana_routes')(app);
-require('./api/trello/trello_routes')(app);
-require('./api/jira/jira_routes')(app);
+app.use('/asana', require('./api/asana/asana_routes'));
+app.use('/jira', require('./api/jira/jira_routes'));
+app.use('/trello', require('./api/trello/trello_routes'))
 
 /* Start Server */
 app.listen(port, () => {

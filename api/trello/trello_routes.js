@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const trello = require('./trello_client');
 
-/* Routes */
-// const tasksRoutes = require('./asana_tasks_routes');
-// const projectsRoutes = require('./asana_projects_routes');
+router.route('/webhook')
+  .get((req, res) => {
+    res.sendStatus(200);
+  })
+  .post((req, res) => {
+    console.log('[trello_webhook_routes] req.body: ', req.body);
+    console.log('[trello_webhook_routes] @post here');
+    res.sendStatus(200);
+  });
 
-module.exports = (app) => {
-  // app.use('/trello', tasksRoutes);
-  // app.use('/trello', projectsRoutes);
-  // app.use('/trello', )
-}
+module.exports = router;
